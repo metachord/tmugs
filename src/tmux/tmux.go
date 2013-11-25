@@ -20,20 +20,23 @@ func (e TmuxError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Err, e.Reason)
 }
 
+func CreateSession(name string) (ts *Session) {
+	ts = new(Session)
+	ts.name = name
+	return
+}
+
 func NewSession(name string) (ts *Session, err error) {
 	out, err := execTmux("new-session", "-d", "-s", name)
 	if err != nil {
 		log.Printf("ERR: %v", err)
 		return nil, TmuxError{err.Error(), out}
 	}
-	ts = new(Session)
-	ts.name = name
-	log.Printf("%v", out)
-	return
+	return CreateSession(name), nil
 }
 
 func (ts *Session) NewWindow(name string, dir string) (out string, err error) {
-	log.Printf("Run new window in dir %v", dir)
+	log.Printf("Run new window %s in dir %v", name, dir)
 	out, err = execTmux("new-window",
 		"-P", "-F", "#{session_name}:#{window_index}",
 		"-t", ts.name,
@@ -54,8 +57,19 @@ func ListSessions() (sessions []string, err error) {
 	return
 }
 
+func ListWindowsIdx(session string) (windows []string, err error) {
+	out, err := execTmux("list-windows",
+		"-t", session,
+		"-F", "#{window_index}:#{window_name}")
+	windows = strings.Split(out, "\n")
+	windows = windows[:len(windows)-1]
+	return
+}
+
 func ListWindows(session string) (windows []string, err error) {
-	out, err := execTmux("list-windows", "-F", "#{window_index}:#{window_name}")
+	out, err := execTmux("list-windows",
+		"-t", session,
+		"-F", "#{window_name}")
 	windows = strings.Split(out, "\n")
 	windows = windows[:len(windows)-1]
 	return
