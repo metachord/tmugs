@@ -152,10 +152,10 @@ func getCfg(filename string) (c *tmugsCfg) {
 }
 
 var SUDOPASS string
+var isSudoValid = false
 
 func getSudoPass() {
-	isValid := false
-	for !isValid {
+	for !isSudoValid {
 		pass, err := gopass.GetPass("Enter SUDO password: ")
 		if err != nil {
 			log.Panic(err)
@@ -200,7 +200,7 @@ func getSudoPass() {
 		}
 
 		SUDOPASS = pass
-		isValid = true
+		isSudoValid = true
 	}
 }
 
