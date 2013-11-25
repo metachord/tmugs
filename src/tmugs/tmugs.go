@@ -273,6 +273,9 @@ func (c *tmugsCfg) newWindow(tab map[string]interface{}) {
 							case "sudo":
 								log.Printf("Run with SUDO: %#v", rv[rkey])
 								c.SendCommand("sudo " + rv[rkey].(string))
+								// wait for prompt
+								// TODO: rewrite with async
+								sleep(2)
 								c.SendCommand(SUDOPASS)
 							default:
 								log.Printf("ERR: Unknown type of run: %#v", rkey)
