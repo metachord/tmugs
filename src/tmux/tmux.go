@@ -12,7 +12,7 @@ type Session struct {
 }
 
 type TmuxError struct {
-	Err string
+	Err    string
 	Reason string
 }
 

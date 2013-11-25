@@ -1,19 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"code.google.com/p/gopass"
 	"flag"
+	"fmt"
 	"github.com/moraes/config"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
-	"strings"
-	"tmux"
-	"time"
 	"path/filepath"
-	"code.google.com/p/gopass"
+	"strings"
+	"time"
+	"tmux"
 )
 
 func init() {
@@ -31,7 +31,6 @@ func main() {
 	args := flag.Args()
 	processArgs(args)
 }
-
 
 func usage() {
 	msg := []string{
@@ -144,20 +143,19 @@ func getCfg(filename string) (c *tmugsCfg) {
 		log.Fatal(err)
 	}
 	c = &tmugsCfg{
-		Config: cfg,
+		Config:  cfg,
 		Session: ts,
-		name: pn,
-		root: proot,
+		name:    pn,
+		root:    proot,
 	}
 	return
 }
 
 var SUDOPASS string
 
-
 func getSudoPass() {
 	isValid := false
-	for ; ! isValid; {
+	for !isValid {
 		pass, err := gopass.GetPass("Enter SUDO password: ")
 		if err != nil {
 			log.Panic(err)
@@ -180,7 +178,7 @@ func getSudoPass() {
 		if err != nil {
 			log.Panic(err)
 		}
-		n, err := io.WriteString(stdin, pass + "\n")
+		n, err := io.WriteString(stdin, pass+"\n")
 
 		if err != nil {
 			log.Panic(err)
