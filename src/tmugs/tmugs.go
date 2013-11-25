@@ -104,7 +104,7 @@ func listSessions() {
 }
 
 func listWindows(session string) {
-	windows, _ := tmux.ListWindows(session)
+	windows, _ := tmux.ListWindowsIdx(session)
 	fmt.Printf("%v\n", strings.Join(windows, "\n"))
 	return
 }
@@ -138,9 +138,20 @@ func getCfg(filename string) (c *tmugsCfg) {
 		getSudoPass()
 	}
 
-	ts, err := tmux.NewSession(pn)
+	sessEx, err := tmux.ListSessions()
 	if err != nil {
 		log.Fatal(err)
+	}
+	log.Printf("Sessions: %#v", sessEx)
+
+	var ts *tmux.Session
+	if isMember(pn, sessEx) {
+		ts = tmux.CreateSession(pn)
+	} else {
+		ts, err = tmux.NewSession(pn)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	c = &tmugsCfg{
 		Config:  cfg,
@@ -178,21 +189,18 @@ func getSudoPass() {
 		if err != nil {
 			log.Panic(err)
 		}
-		n, err := io.WriteString(stdin, pass+"\n")
-
-		if err != nil {
-			log.Panic(err)
-		} else {
-			log.Printf("Write %d bytes", n)
-		}
-
-		outB, err := ioutil.ReadAll(stdout)
+		_, err = io.WriteString(stdin, pass+"\n")
 
 		if err != nil {
 			log.Panic(err)
 		}
 
-		log.Printf("Out: %#v", string(outB))
+		_, err = ioutil.ReadAll(stdout)
+
+		if err != nil {
+			log.Panic(err)
+		}
+
 		err = cmd.Wait()
 
 		if err != nil {
@@ -238,19 +246,31 @@ func (c *tmugsCfg) newWindow(tab map[string]interface{}) {
 		if !ok {
 			sleepS = 0
 		}
-		sleep(sleepS)
 		cd, ok := v.(map[string]interface{})["cd"].(string)
 		if !ok {
 			cd = "."
 		}
 		dir := filepath.Join(c.root, cd)
-		_, err := c.NewWindow(k, dir)
+		winsExists, err := tmux.ListWindows(c.name)
+		if err != nil {
+			log.Printf("Error: %v", err)
+			continue
+		}
+		log.Printf("Windows Exists in %s: %#v", c.name, winsExists)
+
+		if isMember(k, winsExists) {
+			log.Printf("Window %s already exists", k)
+			continue
+		}
+
+		_, err = c.NewWindow(k, dir)
 		if err != nil {
 			log.Printf("Error: %v", err)
 			continue
 		}
 		command, ok := v.(map[string]interface{})["run"]
 		if ok {
+			sleep(sleepS)
 			switch command := command.(type) {
 			case string:
 				log.Printf("Exec: %s", command)
@@ -293,4 +313,15 @@ func (c *tmugsCfg) newWindow(tab map[string]interface{}) {
 			}
 		}
 	}
+}
+
+func isMember(el string, els []string) (member bool) {
+	member = false
+	for _, v := range els {
+		if el == v {
+			member = true
+			return
+		}
+	}
+	return
 }
