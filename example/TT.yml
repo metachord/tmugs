@@ -1,0 +1,20 @@
+# Root of project
+root: ~/
+
+# Request password for sudo commands
+sudo: true
+
+# List of tabs
+tabs:
+  # Tab name
+  - sudoer:
+      # Tab subdirectory
+      cd: sudbdir
+      # Sleep seconds begore each command
+      sleep: 5
+      # List of commands
+      run:
+        - sudo: ls -la /root # This command should run in sudo environment
+        - ls / # Command will be executed second
+  - ordinal:
+      run: ls / # Just one command
