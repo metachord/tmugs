@@ -140,7 +140,7 @@ func getCfg(filename string) (c *tmugsCfg) {
 
 	sessEx, err := tmux.ListSessions()
 	if err != nil {
-		log.Fatal(err)
+		sessEx = []string{}
 	}
 	log.Printf("Sessions: %#v", sessEx)
 
