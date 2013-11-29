@@ -150,6 +150,7 @@ func getCfg(filename string) (c *tmugsCfg) {
 	} else {
 		ts, err = tmux.NewSession(pn)
 		if err != nil {
+			log.Printf("Cannot create new session")
 			log.Fatal(err)
 		}
 	}
@@ -198,12 +199,14 @@ func getSudoPass() {
 		_, err = ioutil.ReadAll(stdout)
 
 		if err != nil {
+			log.Printf("Cannot read from stdout")
 			log.Panic(err)
 		}
 
 		err = cmd.Wait()
 
 		if err != nil {
+			log.Printf("Cannot wait for sudo")
 			log.Panic(err)
 		}
 
